@@ -1447,7 +1447,6 @@ var optionsQuizPart2 = [
 
 
 
-var points = [];
 function getPointsEarned(img_choices,payoffs_shown){
     var points_earned = 0;
     const penalty_points = 5;
@@ -1463,8 +1462,6 @@ function getPointsEarned(img_choices,payoffs_shown){
     }
     return points_earned;
 }
-
-points = getPointsEarned(img_choices,payoffs_shown);
 
 function getPayoffEarned(points_earned){
     const minPayoff = 2.5; // min earnings = 2.5
@@ -1527,13 +1524,15 @@ function getRandomInt(min, max) {
 // }
 
 var pay = 0;
+var points = 0;
 var successExp = false
 var success_guard = {
     type: 'call-function',
     func: () => { 
         successExp = true;
-        pay = getPayoffEarned(points);    
-    }
+        points = getPointsEarned(img_choices,payoffs_shown);
+        pay = getPayoffEarned(points);
+     }
 }
 
 
