@@ -60,17 +60,29 @@ jsPsych.plugins["binary-choice"] = (function () {
         default: 0,
         description: 'Image set used in the experiment.'
       },
-      stimulus_payoff_base: {
+      stimulus_left_payoff_base: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'stimulus_payoff_base',
         default: 0,
-        description: 'Underlying payoff of the stimuli.'
+        description: 'Underlying payoff of the left stimuli.'
       },
-      stimulus_payoff_noise: {
+      stimulus_left_payoff_noise: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'stimulus_payoff_noise',
         default: 0,
-        description: 'Noise payoff of the sitmuli.'
+        description: 'Noise payoff of the left stimuli.'
+      },
+      stimulus_right_payoff_base: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_payoff_base',
+        default: 0,
+        description: 'Underlying payoff of the right stimuli.'
+      },
+      stimulus_right_payoff_noise: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_payoff_noise',
+        default: 0,
+        description: 'Noise payoff of the right stimuli.'
       }
       }  
   };
@@ -207,7 +219,12 @@ jsPsych.plugins["binary-choice"] = (function () {
         "stimulus": trial.stimulus,
         "left_stimulus":trial.stimulus[0],
         "right_stimulus": trial.stimulus[1],
-        "probability":trial.Probabilty,
+        "exp_condition": trial.exp_condition,
+        "exp_image_set": trial.exp_image_set,
+        "stimulus_left_payoff_base": trial.stimulus_left_payoff_base,
+        "stimulus_left_payoff_noise": trial.stimulus_left_payoff_noise,
+        "stimulus_right_payoff_base": trial.stimulus_right_payoff_base,
+        "stimulus_right_payoff_noise": trial.stimulus_right_payoff_noise,
         "rt": response.rt,
         "key_press": response.key,
         "choices": trial.choices,

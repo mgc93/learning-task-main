@@ -1,13 +1,5 @@
 /** to do list */
 
-// consider resizing the fractal images - based on capture rate - need accuracy and precision of webgazer
-// check salience of fractals
-// change from 5 to 12 when to do the validation - include all 105 trials
-
-
-
-
-
 
 /**************/
 /** Constants */
@@ -26,6 +18,10 @@ const feedbackDuration = 2000;
 
 var subject_id = jsPsych.randomization.randomID(7);
 
+var payFailQuiz = '50c';
+var payFailCalibration = '1d';
+
+
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -37,16 +33,16 @@ var imageSet = getRandomInt(1,2);
 
 /** load instructions images */
 var instructions_images = [];
-if(imageSet===1){
-    for (var i = 1; i < 15; i++) {
-        instructions_images.push('img/instructions1/Slide' + i + '.png');
-    }
-} else {
-    for (var i = 1; i < 15; i++) {
-        instructions_images.push('img/instructions2/Slide' + i + '.png');
-    }
+for (var i = 1; i < 14; i++) {
+    instructions_images.push('img/instructions1/Slide' + i + '.png');
 }
 
+var instructions_image_set = [];
+if(imageSet===1){
+    instructions_image_set.push('img/instructions2/images_set_1.png');
+} else {
+    instructions_image_set.push('img/instructions2/images_set_2.png');
+}
 
 /** load learning task images */
 var fractal_images = [];
@@ -318,7 +314,7 @@ var start_exp_survey_trial = {
     questions: [
         { prompt: "What's your worker ID?", rows: 2, columns: 50, required: true },
         { prompt: "What's your age?", rows: 1, columns: 50, required: true },
-        { prompt: "What's your gender? (Female/Male/Other/Prefer Not To Say)", rows: 1, columns: 50, require: true },
+        { prompt: "What's your gender?", rows: 1, columns: 50, require: true },
     ],
     preamble: `<div>Thanks for choosing our experiment! Please answer the following questions to begin today's study. </div>`,
 };
@@ -456,7 +452,7 @@ var inital_eye_calibration = {
                     if (!success && calibrationAttempt == calibrationMax) {
                         survey_code = makeSurveyCode('failed');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration}. Thank you for signing up!`);
                     }
                 }
             }
@@ -507,6 +503,30 @@ function getAnswersQuiz(questions_data){
     return nCorrect;
 }
 
+function getFeedbackQuiz(questions_data,q){
+    var nCorrect = 0;
+    var responses = [];
+    var feedback = [];
+    for(var i = 0; i <questions_data.length; i++){
+        responses.push(questions_data[i].responses)
+    }
+    // var responses = questions_data[0].responses.slice(1,questions_data[0].responses.length-1).split(',');
+    var correctAnswers = ["The first payoff for the dark gray square",
+                        "The second payoff for the white square",
+                        "13",
+                        "12",
+                        "The light gray square"];
+    for(var i = 0; i < responses.length; i++){
+        if(responses[i].includes(correctAnswers[i])){
+            nCorrect = nCorrect + 1;
+            feedback.push('correct');
+        } else {
+            nCorrect = nCorrect + 0;
+            feedback.push('incorrect');
+        }
+    }
+    return feedback[q-1];
+}
 
 function getImgHTML(instructions){
     var imgHTMLInstructions = [];
@@ -564,8 +584,14 @@ var question_4_options = ["12",
 var question_5_options = ["The dark gray square",
                     "The light gray square"];
 
+
 // highlight correct answer with green and provide explanation at the bottom
 var questions_data = [];
+var feedback_question_1 = [];
+var feedback_question_2 = [];
+var feedback_question_3 = [];
+var feedback_question_4 = [];
+var feedback_question_5 = [];
 // question 1
 var controlQuestion1 = {
     type: 'survey-multi-choice',
@@ -583,36 +609,85 @@ var controlQuestion1 = {
     <img class = 'img_questions' src="img/control/control_img_2.png"></img>`,
     on_finish: function (data) {
         questions_data.push(data);
+        if(data.responses.includes("The first payoff for the dark gray square")){
+            data.correct = true; // can add property correct by modify data object directly
+          } else {
+            data.correct = false;
+        }
     }
 };
 
 var controlQuestion1Response = {
     type: 'html-keyboard-response',
-    stimulus: `
-    <div>Round 31 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_1.png"></img>
-    <div>Round 32 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-    <div>Question 1: What does the top number (+4) in Round 31 represent? 
-    <br><br/>
-    The first payoff for the dark gray square <br>
-    The payoff is not relevant to the task <br>
-    The first payoff for the white square <br>
-    The second payoff for the dark gray square 
-    <br><br/>
-    The correct answer is: <font color = 'green';>the first payoff for the dark gray square </font>.
-    <br><br/>
-    In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
-    <br><br/>
-    Recall that each image will give you 2 payoffs; <br>
-    one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
-    Therefore, the number +4 on the top image (the dark gray square) represents <font color = 'green';>the first payoff for the dark gray square </font>. 
-    <br><br/>
-    When you are ready, press the  <b>SPACE BAR</b> to continue. 
-    <br><br/> </div>`,
+    stimulus: function(){
+        feedback_question_1 = jsPsych.data.get().last(1).values()[0].correct;
+        if(feedback_question_1){
+          return `
+          <div>Your answer was correct!</div>
+          <br><br/> 
+            <div>Round 31 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+            <div>Round 32 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+            <div>Question 1: What does the top number (+4) in Round 31 represent? 
+            <br><br/>
+            The first payoff for the dark gray square <br>
+            The payoff is not relevant to the task <br>
+            The first payoff for the white square <br>
+            The second payoff for the dark gray square 
+            <br><br/>
+            The correct answer is: <font color = 'green';>the first payoff for the dark gray square </font>.
+            <br><br/>
+            In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
+            <br><br/>
+            Recall that each image will give you 2 payoffs; <br>
+            one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+            Therefore, the number +4 on the top image (the dark gray square) represents <font color = 'green';>the first payoff for the dark gray square </font>. 
+            <br><br/>
+            When you are ready, press the  <b>SPACE BAR</b> to continue. 
+            <br><br/> </div>
+          `;
+        } else {
+          return `
+          <div>Your answer was incorrect!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`
+        }
+    },
     post_trial_gap: 500,
     choices: ['spacebar'],
 }
+
+// var controlQuestion1Response = {
+//     type: 'html-keyboard-response',
+//     stimulus: `
+//     <div>Round 31 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+//     <div>Round 32 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+//     <div>Question 1: What does the top number (+4) in Round 31 represent? 
+//     <br><br/>
+//     The first payoff for the dark gray square <br>
+//     The payoff is not relevant to the task <br>
+//     The first payoff for the white square <br>
+//     The second payoff for the dark gray square 
+//     <br><br/>
+//     The correct answer is: <font color = 'green';>the first payoff for the dark gray square </font>.
+//     <br><br/>
+//     In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
+//     <br><br/>
+//     Recall that each image will give you 2 payoffs; <br>
+//     one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+//     Therefore, the number +4 on the top image (the dark gray square) represents <font color = 'green';>the first payoff for the dark gray square </font>. 
+//     <br><br/>
+//     When you are ready, press the  <b>SPACE BAR</b> to continue. 
+//     <br><br/> </div>`,
+//     post_trial_gap: 500,
+//     choices: ['spacebar'],
+// }
+
 // question 2
 var controlQuestion2 = {
     type: 'survey-multi-choice',
@@ -628,36 +703,85 @@ var controlQuestion2 = {
     <img class = 'img_questions' src="img/control/control_img_2.png"></img>`,
     on_finish: function (data) {
         questions_data.push(data);
+        if(data.responses.includes("The second payoff for the white square")){
+            data.correct = true; // can add property correct by modify data object directly
+          } else {
+            data.correct = false;
+        }
     }
 };
 
 var controlQuestion2Response = {
     type: 'html-keyboard-response',
-    stimulus: `
-    <div>Round 31 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_1.png"></img>
-    <div>Round 32 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-    <div> Question 2: What does the bottom number (+9) in Round 31 represent? 
-    <br><br/>
-    The payoff is not relevant to the task <br>
-    The first payoff for the white square <br>
-    The second payoff for the white square <br>
-    The first payoff for the dark gray square 
-    <br><br/>
-    The correct answer is: <font color = 'green';> the second payoff for the white square </font>.
-    <br><br/>
-    In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
-    <br><br/>
-    Recall that each image will give you 2 payoffs; <br>
-    one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
-    Therefore, the number +9 on the bottom image (the white square) represents  <font color = 'green';>the second payoff for the white square </font>. 
-    <br><br/>
-    When you are ready, press the  <b>SPACE BAR</b> to continue. 
-    <br><br/></div>`,
+    stimulus: function(){
+        feedback_question_2 = jsPsych.data.get().last(1).values()[0].correct;
+        if(feedback_question_2){
+          return `
+          <div>Your answer was correct!</div>
+          <br><br/> 
+            <div>Round 31 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+            <div>Round 32 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+            <div> Question 2: What does the bottom number (+9) in Round 31 represent? 
+            <br><br/>
+            The payoff is not relevant to the task <br>
+            The first payoff for the white square <br>
+            The second payoff for the white square <br>
+            The first payoff for the dark gray square 
+            <br><br/>
+            The correct answer is: <font color = 'green';> the second payoff for the white square </font>.
+            <br><br/>
+            In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
+            <br><br/>
+            Recall that each image will give you 2 payoffs; <br>
+            one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+            Therefore, the number +9 on the bottom image (the white square) represents  <font color = 'green';>the second payoff for the white square </font>. 
+            <br><br/>
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was incorrect!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`
+        }
+    },
     post_trial_gap: 500,
     choices: ['spacebar'],
 }
+
+// var controlQuestion2Response = {
+//     type: 'html-keyboard-response',
+//     stimulus: `
+//     <div>Round 31 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+//     <div>Round 32 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+//     <div> Question 2: What does the bottom number (+9) in Round 31 represent? 
+//     <br><br/>
+//     The payoff is not relevant to the task <br>
+//     The first payoff for the white square <br>
+//     The second payoff for the white square <br>
+//     The first payoff for the dark gray square 
+//     <br><br/>
+//     The correct answer is: <font color = 'green';> the second payoff for the white square </font>.
+//     <br><br/>
+//     In round 31, it can be inferred from the feedback screen that the dark gray square was chosen in that round and the white square was chosen in the previous round. 
+//     <br><br/>
+//     Recall that each image will give you 2 payoffs; <br>
+//     one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+//     Therefore, the number +9 on the bottom image (the white square) represents  <font color = 'green';>the second payoff for the white square </font>. 
+//     <br><br/>
+//     When you are ready, press the  <b>SPACE BAR</b> to continue. 
+//     <br><br/></div>`,
+//     post_trial_gap: 500,
+//     choices: ['spacebar'],
+// }
+
 // question 3
 var controlQuestion3 = {
     type: 'survey-multi-choice',
@@ -673,35 +797,83 @@ var controlQuestion3 = {
     <img class = 'img_questions' src="img/control/control_img_2.png"></img>`,
     on_finish: function (data) {
         questions_data.push(data);
+        if(data.responses.includes("13")){
+            data.correct = true; // can add property correct by modify data object directly
+          } else {
+            data.correct = false;
+        }
     }
 };
 
 var controlQuestion3Response = {
     type: 'html-keyboard-response',
-    stimulus: `
-    <div>Round 31 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_1.png"></img>
-    <div>Round 32 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-    <div> Question 3: What is your total payoff for Round 31? 
-    <br><br/>
-    4 <br>
-    9 <br>
-    11 <br>
-    13 
-    <br><br/>
-    The correct answer is: <font color = 'green';> 13 </font>. <br>
-    <br><br/>
-    Your total payoff in points for a round is the sum of the payoffs for that round. In this case, for round 31 you got: <br>
-    + 4 as the first payoff for the dark gray square chosen in that round.<br>
-    + 9 as the second payoff for the white square chosen in the previous round.<br>
-    Your total payoff is therefore: 4 + 9 = <font color = 'green';> 13 </font>.
-    <br><br/>
-    When you are ready, press the  <b>SPACE BAR</b> to continue. 
-    <br><br/></div>`,
+    stimulus: function(){
+        feedback_question_3 = jsPsych.data.get().last(1).values()[0].correct;
+        if(feedback_question_3){
+          return `
+          <div>Your answer was correct!</div>
+          <br><br/> 
+            <div>Round 31 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+            <div>Round 32 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+            <div> Question 3: What is your total payoff for Round 31? 
+            <br><br/>
+            4 <br>
+            9 <br>
+            11 <br>
+            13 
+            <br><br/>
+            The correct answer is: <font color = 'green';> 13 </font>. <br>
+            <br><br/>
+            Your total payoff in points for a round is the sum of the payoffs for that round. In this case, for round 31 you got: <br>
+            + 4 as the first payoff for the dark gray square chosen in that round.<br>
+            + 9 as the second payoff for the white square chosen in the previous round.<br>
+            Your total payoff is therefore: 4 + 9 = <font color = 'green';> 13 </font>.
+            <br><br/>
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was incorrect!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`
+        }
+    },
     post_trial_gap: 500,
     choices: ['spacebar'],
 }
+
+// var controlQuestion3Response = {
+//     type: 'html-keyboard-response',
+//     stimulus: `
+//     <div>Round 31 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+//     <div>Round 32 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+//     <div> Question 3: What is your total payoff for Round 31? 
+//     <br><br/>
+//     4 <br>
+//     9 <br>
+//     11 <br>
+//     13 
+//     <br><br/>
+//     The correct answer is: <font color = 'green';> 13 </font>. <br>
+//     <br><br/>
+//     Your total payoff in points for a round is the sum of the payoffs for that round. In this case, for round 31 you got: <br>
+//     + 4 as the first payoff for the dark gray square chosen in that round.<br>
+//     + 9 as the second payoff for the white square chosen in the previous round.<br>
+//     Your total payoff is therefore: 4 + 9 = <font color = 'green';> 13 </font>.
+//     <br><br/>
+//     When you are ready, press the  <b>SPACE BAR</b> to continue. 
+//     <br><br/></div>`,
+//     post_trial_gap: 500,
+//     choices: ['spacebar'],
+// }
+
 // question 4
 var controlQuestion4 = {
     type: 'survey-multi-choice',
@@ -718,34 +890,81 @@ var controlQuestion4 = {
     <img class = 'img_questions' src="img/control/control_img_2.png"></img>`,
     on_finish: function (data) {
         questions_data.push(data);
+        if(data.responses.includes("12")){
+            data.correct = true; // can add property correct by modify data object directly
+          } else {
+            data.correct = false;
+        }
     }
 };
 
 var controlQuestion4Response = {
     type: 'html-keyboard-response',
-    stimulus: `
-    <div>Round 31 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_1.png"></img>
-    <div>Round 32 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-    <div> Question 4: What is the total payoff of the dark gray square from Round 31 and Round 32? 
-    <br><br/>
-    12 <br>
-    16 <br>
-    13 
-    <br><br/>
-    The correct answer is: <font color = 'green';> 12 </font>. <br>
-    <br><br/>
-    Recall that each image will give you 2 payoffs; <br>
-    one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
-    The dark gray square gives you + 4 in round 31 and + 8 in round 32. <br>
-    Therefore, the total payoff for the dark gray square is <font color = 'green';> 12 </font>.
-    <br><br/>
-    When you are ready, press the  <b>SPACE BAR</b> to continue. 
-    <br><br/></div>`,
+    stimulus: function(){
+        feedback_question_4 = jsPsych.data.get().last(1).values()[0].correct;
+        if(feedback_question_4){
+          return `
+          <div>Your answer was correct!</div>
+          <br><br/> 
+            <div>Round 31 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+            <div>Round 32 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+            <div> Question 4: What is the total payoff of the dark gray square from Round 31 and Round 32? 
+            <br><br/>
+            12 <br>
+            16 <br>
+            13 
+            <br><br/>
+            The correct answer is: <font color = 'green';> 12 </font>. <br>
+            <br><br/>
+            Recall that each image will give you 2 payoffs; <br>
+            one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+            The dark gray square gives you + 4 in round 31 and + 8 in round 32. <br>
+            Therefore, the total payoff for the dark gray square is <font color = 'green';> 12 </font>.
+            <br><br/>
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was incorrect!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`
+        }
+    },
     post_trial_gap: 500,
     choices: ['spacebar'],
 }
+
+// var controlQuestion4Response = {
+//     type: 'html-keyboard-response',
+//     stimulus: `
+//     <div>Round 31 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+//     <div>Round 32 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+//     <div> Question 4: What is the total payoff of the dark gray square from Round 31 and Round 32? 
+//     <br><br/>
+//     12 <br>
+//     16 <br>
+//     13 
+//     <br><br/>
+//     The correct answer is: <font color = 'green';> 12 </font>. <br>
+//     <br><br/>
+//     Recall that each image will give you 2 payoffs; <br>
+//     one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+//     The dark gray square gives you + 4 in round 31 and + 8 in round 32. <br>
+//     Therefore, the total payoff for the dark gray square is <font color = 'green';> 12 </font>.
+//     <br><br/>
+//     When you are ready, press the  <b>SPACE BAR</b> to continue. 
+//     <br><br/></div>`,
+//     post_trial_gap: 500,
+//     choices: ['spacebar'],
+// }
+
 //question 5
 var controlQuestion5 = {
     type: 'survey-multi-choice',
@@ -762,30 +981,50 @@ var controlQuestion5 = {
     <img class = 'img_questions' src="img/control/control_img_2.png"></img>`,
     on_finish: function (data) {
         questions_data.push(data);
+        if(data.responses.includes("The light gray square")){
+            data.correct = true; // can add property correct by modify data object directly
+          } else {
+            data.correct = false;
+        }
     }
 };
 
 var controlQuestion5Response = {
     type: 'html-keyboard-response',
-    stimulus: `
-    <div>Round 31 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_1.png"></img>
-    <div>Round 32 – Feedback screen</div>
-    <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-    <div> Question 5: What was chosen in Round 32? 
-    <br><br/>
-    The dark gray square <br>
-    The light gray square 
-    <br><br/>
-    The correct answer is: <font color = 'green';> the light gray square </font>. <br>
-    <br><br/>
-    Recall that each image will give you 2 payoffs; <br>
-    one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
-    In round 32, it can be inferred from the feedback screen that <font color = 'green';> the light gray square </font> was chosen in that round <br>
-    and the dark gray square was chosen in the previous round. 
-    <br><br/>
-    When you are ready, press the  <b>SPACE BAR</b> to continue. 
-    <br><br/></div>`,
+    stimulus: function(){
+        feedback_question_5 = jsPsych.data.get().last(1).values()[0].correct;
+        if(feedback_question_5){
+          return `
+          <div>Your answer was correct!</div>
+          <br><br/> 
+            <div>Round 31 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+            <div>Round 32 – Feedback screen</div>
+            <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+            <div> Question 5: What was chosen in Round 32? 
+            <br><br/>
+            The dark gray square <br>
+            The light gray square 
+            <br><br/>
+            The correct answer is: <font color = 'green';> the light gray square </font>. <br>
+            <br><br/>
+            Recall that each image will give you 2 payoffs; <br>
+            one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+            In round 32, it can be inferred from the feedback screen that <font color = 'green';> the light gray square </font> was chosen in that round <br>
+            and the dark gray square was chosen in the previous round. 
+            <br><br/>
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was incorrect!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`
+        }
+    },
     post_trial_gap: 500,
     choices: ['spacebar'],
     on_finish: function (data) {
@@ -793,9 +1032,65 @@ var controlQuestion5Response = {
         if(nCorrect<4){
             survey_code = makeSurveyCode('failed');
             closeFullscreen();
-            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}. Thank you for signing up!`);
+            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailQuiz}. Thank you for signing up!`);
         }
     }
+}
+
+// var controlQuestion5Response = {
+//     type: 'html-keyboard-response',
+//     stimulus: `
+//     <div>Round 31 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_1.png"></img>
+//     <div>Round 32 – Feedback screen</div>
+//     <img class = 'img_questions' src="img/control/control_img_2.png"></img>
+//     <div> Question 5: What was chosen in Round 32? 
+//     <br><br/>
+//     The dark gray square <br>
+//     The light gray square 
+//     <br><br/>
+//     The correct answer is: <font color = 'green';> the light gray square </font>. <br>
+//     <br><br/>
+//     Recall that each image will give you 2 payoffs; <br>
+//     one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
+//     In round 32, it can be inferred from the feedback screen that <font color = 'green';> the light gray square </font> was chosen in that round <br>
+//     and the dark gray square was chosen in the previous round. 
+//     <br><br/>
+//     When you are ready, press the  <b>SPACE BAR</b> to continue. 
+//     <br><br/></div>`,
+//     post_trial_gap: 500,
+//     choices: ['spacebar'],
+//     on_finish: function (data) {
+//         nCorrect = getAnswersQuiz(questions_data);
+//         if(nCorrect<4){
+//             survey_code = makeSurveyCode('failed');
+//             closeFullscreen();
+//             jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}. Thank you for signing up!`);
+//         }
+//     }
+// }
+
+var learningTaskInstructionsSet = {
+    type: 'html-keyboard-response',
+    stimulus: function(){
+        if(imageSet==1){
+          return `
+          <div>
+          <br><br/> 
+          <img class = 'img_questions_set' src="img/instructions2/images_set_1.png"></img> 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>
+          <br><br/> 
+          <img class = 'img_questions_set' src="img/instructions2/images_set_2.png"></img> 
+          <br><br/> 
+          </div>`;
+        }
+    },
+    post_trial_gap: 500,
+    choices: ['spacebar'],
 }
 
 var choiceInstructionReinforce = {
@@ -863,10 +1158,6 @@ var recalibration = {
         }
     ],
 };
-
-
-
-
 
 
 
@@ -1064,8 +1355,198 @@ function getPointsImg(img_choices){
     }
 }
 
+//get feedback underlying points and noise
+function getPointsBase(img_choices){
+    var r0 = [];
+    var r1 = [];
+    if(choice_count!==0){
+        // left 
+        if(img_choices[choice_count-1].key_press === 37){
+            if(img_choices[choice_count].key_press === 37){
+                // immediate payoff for left (current choice)
+                // delayed payoff for left (previous choice)
+                return [payoffs_base[choice_count][0][0],payoffs_base[choice_count-1][0][1]];
+            } else if (img_choices[choice_count].key_press === 39) {
+                // immediate payoff for right (current choice)
+                // delayed payoff for left (previous choice)
+                return [payoffs_base[choice_count][1][0],payoffs_base[choice_count-1][0][1]];
+            } else {
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_base[choice_count][0][0];
+                    return [r1,payoffs_base[choice_count-1][0][1]];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_base[choice_count][1][0];
+                    return [r1,payoffs_base[choice_count-1][0][1]];
+                }
+            }
+        }
+        //right
+        if(img_choices[choice_count-1].key_press === 39){
+            if(img_choices[choice_count].key_press === 37){
+                // immediate payoff for left (current choice)
+                // delayed payoff for right (previous choice)
+                return [payoffs_base[choice_count][0][0],payoffs_base[choice_count-1][1][1]];
+            } else if (img_choices[choice_count].key_press === 39) {
+                // immediate payoff for right (current choice)
+                // delayed payoff for right (previous choice)
+                return [payoffs_base[choice_count][1][0],payoffs_base[choice_count-1][1][1]];
+            } else {
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_base[choice_count][0][0];
+                    return [r1,payoffs_base[choice_count-1][1][1]];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_base[choice_count][1][0];
+                    return [r1,payoffs_base[choice_count-1][1][1]];
+                }
+            }
+        }
+        // no choice
+        if(img_choices[choice_count-1].key_press !== 39 && img_choices[choice_count-1].key_press !== 37){
+            if(rand_choices[choice_count-1]===0){
+                r0 = payoffs_base[choice_count-1][0][1];
+            }
+            if(rand_choices[choice_count-1]===1){
+                r0 = payoffs_base[choice_count-1][1][1];
+            }
+            //replace with random selection
+            if(img_choices[choice_count].key_press === 37){
+                return [payoffs_base[choice_count][0][0],r0];
+            }
+            if(img_choices[choice_count].key_press === 39){
+                return [payoffs_base[choice_count][1][0],r0];
+            } 
+            if(img_choices[choice_count].key_press !== 39 && img_choices[choice_count].key_press !== 37){
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_base[choice_count][0][0];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_base[choice_count][1][0];
+                }
+                return [r1,r0];
+            } 
+        }
+    // trial 1
+    } else {
+        if(img_choices[choice_count].key_press === 37){
+            // immediate payoff for left (current choice)
+            return [payoffs_base[choice_count][0][0],0];
+        } else if (img_choices[choice_count].key_press === 39){
+            // immediate payoff for right (current choice)
+            return [payoffs_base[choice_count][1][0],0];
+        } else {
+            //replace with random selection
+            if(rand_choices[choice_count]===0){
+                r1 = payoffs_base[choice_count][0][0];
+            }
+            if(rand_choices[choice_count]===1){
+                r1 = payoffs_base[choice_count][1][0];
+            }
+            return [r1,0]
+        }
+    }
+}
 
 
+//get feedback underlying points and noise
+function getPointsNoise(img_choices){
+    var r0 = [];
+    var r1 = [];
+    if(choice_count!==0){
+        // left 
+        if(img_choices[choice_count-1].key_press === 37){
+            if(img_choices[choice_count].key_press === 37){
+                // immediate payoff for left (current choice)
+                // delayed payoff for left (previous choice)
+                return [payoffs_noise[choice_count][0][0],payoffs_noise[choice_count-1][0][1]];
+            } else if (img_choices[choice_count].key_press === 39) {
+                // immediate payoff for right (current choice)
+                // delayed payoff for left (previous choice)
+                return [payoffs_noise[choice_count][1][0],payoffs_noise[choice_count-1][0][1]];
+            } else {
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_noise[choice_count][0][0];
+                    return [r1,payoffs_noise[choice_count-1][0][1]];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_noise[choice_count][1][0];
+                    return [r1,payoffs_noise[choice_count-1][0][1]];
+                }
+            }
+        }
+        //right
+        if(img_choices[choice_count-1].key_press === 39){
+            if(img_choices[choice_count].key_press === 37){
+                // immediate payoff for left (current choice)
+                // delayed payoff for right (previous choice)
+                return [payoffs_noise[choice_count][0][0],payoffs_noise[choice_count-1][1][1]];
+            } else if (img_choices[choice_count].key_press === 39) {
+                // immediate payoff for right (current choice)
+                // delayed payoff for right (previous choice)
+                return [payoffs_noise[choice_count][1][0],payoffs_noise[choice_count-1][1][1]];
+            } else {
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_noise[choice_count][0][0];
+                    return [r1,payoffs_noise[choice_count-1][1][1]];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_noise[choice_count][1][0];
+                    return [r1,payoffs_noise[choice_count-1][1][1]];
+                }
+            }
+        }
+        // no choice
+        if(img_choices[choice_count-1].key_press !== 39 && img_choices[choice_count-1].key_press !== 37){
+            if(rand_choices[choice_count-1]===0){
+                r0 = payoffs_noise[choice_count-1][0][1];
+            }
+            if(rand_choices[choice_count-1]===1){
+                r0 = payoffs_noise[choice_count-1][1][1];
+            }
+            //replace with random selection
+            if(img_choices[choice_count].key_press === 37){
+                return [payoffs_noise[choice_count][0][0],r0];
+            }
+            if(img_choices[choice_count].key_press === 39){
+                return [payoffs_noise[choice_count][1][0],r0];
+            } 
+            if(img_choices[choice_count].key_press !== 39 && img_choices[choice_count].key_press !== 37){
+                //replace with random selection
+                if(rand_choices[choice_count]===0){
+                    r1 = payoffs_noise[choice_count][0][0];
+                }
+                if(rand_choices[choice_count]===1){
+                    r1 = payoffs_noise[choice_count][1][0];
+                }
+                return [r1,r0];
+            } 
+        }
+    // trial 1
+    } else {
+        if(img_choices[choice_count].key_press === 37){
+            // immediate payoff for left (current choice)
+            return [payoffs_noise[choice_count][0][0],0];
+        } else if (img_choices[choice_count].key_press === 39){
+            // immediate payoff for right (current choice)
+            return [payoffs_noise[choice_count][1][0],0];
+        } else {
+            //replace with random selection
+            if(rand_choices[choice_count]===0){
+                r1 = payoffs_noise[choice_count][0][0];
+            }
+            if(rand_choices[choice_count]===1){
+                r1 = payoffs_noise[choice_count][1][0];
+            }
+            return [r1,0]
+        }
+    }
+}
 
 var binary_choice_states = {
     //set the default 
@@ -1115,9 +1596,14 @@ var binary_state_updater = function () {
 
 /** choices */
 var choiceImgLast = [];
+var pointsImgLast = [];
+var pointsBaseLast = [];
+var pointsNoiseLast = [];
 var feedback_count = 0;
 var choice_count = 0;
+// data
 var img_choices = [];
+var feedback_data = [];
 
 var fixation = {
     type: "eye-tracking",
@@ -1193,12 +1679,16 @@ var learning_choice_1 = {
             stimulus_duration: 3000, // 3000
             exp_condition: condition,
             exp_image_set: imageSet,
-            stimulus_payoff_base: payoffs_base[choice_count],
-            stimulus_payoff_noise: payoffs_noise[choice_count],
+            stimulus_left_payoff_base: () => payoffs_base[choice_count][0],
+            stimulus_left_payoff_noise: () => payoffs_noise[choice_count][0],
+            stimulus_right_payoff_base: () => payoffs_base[choice_count][1],
+            stimulus_right_payoff_noise: () => payoffs_noise[choice_count][1],
             on_finish: function (data) {
                 img_choices.push(data);
                 choiceImgLast = getChoiceImg(img_choices);
                 pointsImgLast = getPointsImg(img_choices);
+                pointsBaseLast = getPointsBase(img_choices);
+                pointsNoiseLast = getPointsNoise(img_choices);
                 choice_count++;
             }
         },
@@ -1209,7 +1699,14 @@ var learning_choice_1 = {
             points: () => pointsImgLast,
             choices: jsPsych.NO_KEYS,
             realOrPrac: false,
-            on_finish: function () {
+            exp_condition: condition,
+            exp_image_set: imageSet,
+            stimulus_top_payoff_base: () => pointsBaseLast[0],
+            stimulus_top_payoff_noise: () => pointsNoiseLast[0],
+            stimulus_bottom_payoff_base: () => pointsBaseLast[1],
+            stimulus_bottom_payoff_noise: () => pointsNoiseLast[1],
+            on_finish: function (data) {
+                feedback_data.push(data)
                 feedback_count++;
             },
             timing_response: feedbackDuration
@@ -1278,12 +1775,16 @@ var learning_choice_2 = {
             stimulus_duration: 3000, // 3000
             exp_condition: condition,
             exp_image_set: imageSet,
-            stimulus_payoff_base: payoffs_base[choice_count],
-            stimulus_payoff_noise: payoffs_noise[choice_count],
+            stimulus_left_payoff_base: payoffs_base[choice_count][0],
+            stimulus_left_payoff_noise: payoffs_noise[choice_count][0],
+            stimulus_right_payoff_base: payoffs_base[choice_count][1],
+            stimulus_right_payoff_noise: payoffs_noise[choice_count][1],
             on_finish: function (data) {
                 img_choices.push(data);
                 choiceImgLast = getChoiceImg(img_choices);
                 pointsImgLast = getPointsImg(img_choices);
+                pointsBaseLast = getPointsBase(img_choices);
+                pointsNoiseLast = getPointsNoise(img_choices);
                 choice_count++;
             }
         },
@@ -1294,6 +1795,12 @@ var learning_choice_2 = {
             points: () => pointsImgLast,
             choices: jsPsych.NO_KEYS,
             realOrPrac: false,
+            exp_condition: condition,
+            exp_image_set: imageSet,
+            stimulus_top_payoff_base: () => pointsBaseLast[0],
+            stimulus_top_payoff_noise: () => pointsNoiseLast[0],
+            stimulus_bottom_payoff_base: () => pointsBaseLast[1],
+            stimulus_bottom_payoff_noise: () => pointsNoiseLast[1],
             on_finish: function () {
                 feedback_count++;
             },
@@ -1409,9 +1916,9 @@ var optionsQuizPart2 = [
     <br><br/>
     <img class = 'img_memory_questions' src="${memory_images[0]}"></img>
     <br><br/>
-    <div>For which colors was the first payoff larger than the second payoff? <br>
-    For which colors was the first payoff smaller than the second payoff? <br>
-    For which colors were the first and second payoffs equal?</div>
+    <div>For which image was the first payoff larger than the second payoff? <br>
+    For which image was the first payoff smaller than the second payoff? <br>
+    For which image were the first and second payoffs equal?</div>
     <br><br/>
     </div>`
   };
@@ -1419,12 +1926,12 @@ var optionsQuizPart2 = [
   var memoryQuizPart3 = {
     type: 'survey-text',
     questions: [
-        { prompt: "Number of points for image A:", rows: 1, columns: 30, required: true },
-        { prompt: "Number of points for image B:", rows: 1, columns: 30, required: true },
-        { prompt: "Number of points for image C:", rows: 1, columns: 30, required: true },
-        { prompt: "Number of points for image D:", rows: 1, columns: 30, required: true },
-        { prompt: "Number of points for image E:", rows: 1, columns: 30, required: true },
-        { prompt: "Number of points for image F:", rows: 1, columns: 30, required: true }   
+        { prompt: "Number of points for image A", rows: 1, columns: 30, required: true },
+        { prompt: "Number of points for image B", rows: 1, columns: 30, required: true },
+        { prompt: "Number of points for image C", rows: 1, columns: 30, required: true },
+        { prompt: "Number of points for image D", rows: 1, columns: 30, required: true },
+        { prompt: "Number of points for image E", rows: 1, columns: 30, required: true },
+        { prompt: "Number of points for image F", rows: 1, columns: 30, required: true }   
     ],
     preamble: `<div> 
     <br><br/>
@@ -1621,6 +2128,7 @@ function startExperiment() {
             eyeTrackingInstruction2, 
             inital_eye_calibration,
             experimentOverview,
+            learningTaskInstructionsSet,
             choiceInstructionReinforce,
             choiceOverview,
             // recalibration,
@@ -1642,7 +2150,7 @@ function startExperiment() {
                 jsPsych.endExperiment(`<div>
                 Thank you for your participation! You can close the browser to end the experiment now. </br>
                 The webcam will turn off when you close the browser. </br>
-                Your survey code is: ${makeSurveyCode('success')}. </br>
+                Your survey code is: ${makeSurveyCode('success')}${pay*100} </br>
                 We will send you $ ${pay} as your participant fee soon! </br> 
                 </div>`);
             }
@@ -1651,7 +2159,7 @@ function startExperiment() {
                 jsPsych.data.reset();
             }
         },
-        preload_images: [instructions_images, fractal_images, blank_image, control_images, memory_images, instruct_img],
+        preload_images: [instructions_images, instructions_image_set, fractal_images, blank_image, control_images, memory_images, instruct_img],
         on_finish: () => on_finish_callback(),
         on_close: () => on_finish_callback()
 

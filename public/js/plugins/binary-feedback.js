@@ -47,6 +47,42 @@ jsPsych.plugins["binary-feedback"] = (function () {
         pretty_name: 'eye-tracking',
         default: true,
         description: 'Whether it is a real choice, real- true'
+      },
+      exp_condition: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'exp_condition',
+        default: 0,
+        description: 'Condition of the experiment.'
+      },
+      exp_image_set: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'exp_image_set',
+        default: 0,
+        description: 'Image set used in the experiment.'
+      },
+      stimulus_top_payoff_base: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_top_payoff_base',
+        default: 0,
+        description: 'Underlying payoff of the top stimuli.'
+      },
+      stimulus_top_payoff_noise: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_top_payoff_noise',
+        default: 0,
+        description: 'Noise payoff of the top stimuli.'
+      },
+      stimulus_bottom_payoff_base: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_bottom_payoff_base',
+        default: 0,
+        description: 'Underlying payoff of the bottom stimuli.'
+      },
+      stimulus_bottom_payoff_noise: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'stimulus_bottom_payoff_noise',
+        default: 0,
+        description: 'Noise payoff of the bottm stimuli.'
       }
       }  
   };
@@ -181,7 +217,12 @@ jsPsych.plugins["binary-feedback"] = (function () {
         "points": trial.points,
         "top_points": trial.points[0],
         "bottom_points": trial.points[1],
-        "probability":trial.Probabilty,
+        "exp_condition": trial.exp_condition,
+        "exp_image_set": trial.exp_image_set,
+        "stimulus_top_payoff_base": trial.stimulus_top_payoff_base,
+        "stimulus_top_payoff_noise": trial.stimulus_top_payoff_noise,
+        "stimulus_bottom_payoff_base": trial.stimulus_bottom_payoff_base,
+        "stimulus_bottom_payoff_noise": trial.stimulus_bottom_payoff_noise,
         "rt": response.rt,
         "key_press": response.key,
         "choices": trial.choices,
