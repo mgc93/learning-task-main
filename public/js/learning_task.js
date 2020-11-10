@@ -1,4 +1,8 @@
 /** to do list */
+// main version
+// update payment per point
+// check for an error in the code: feedback at start of part 2 the same image!
+// check if eyetracking data is saved correctly
 
 
 /**************/
@@ -19,7 +23,7 @@ const feedbackDuration = 2000;
 var subject_id = jsPsych.randomization.randomID(7);
 
 var payFailQuiz = '50c';
-var payFailCalibration = '1d';
+var payFailCalibration = '50c';
 
 
 function getRandomInt(min, max) {
@@ -617,19 +621,29 @@ var controlQuestion1 = {
     }
 };
 
+
 var controlQuestion1Response = {
     type: 'html-keyboard-response',
     stimulus: function(){
         feedback_question_1 = jsPsych.data.get().last(1).values()[0].correct;
         if(feedback_question_1){
           return `
-          <div>Your answer was correct!</div>
+          <div>Your answer was <font size=120%; font color = 'green';>correct </font>!</div>
+          <br><br/> 
+            When you are ready, press the  <b>SPACE BAR</b> to continue. 
+            <br><br/> </div>
+          `;
+        } else {
+          return `
+          <div>Your answer was <font size=120%; font color = 'red';>incorrect </font>!</div>
+          <br><br/> 
+          <div>Question 1: What does the top number (+4) in Round 31 represent? </div>
           <br><br/> 
             <div>Round 31 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_1.png"></img>
             <div>Round 32 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-            <div>Question 1: What does the top number (+4) in Round 31 represent? 
+            <div>
             <br><br/>
             The first payoff for the dark gray square <br>
             The payoff is not relevant to the task <br>
@@ -644,13 +658,6 @@ var controlQuestion1Response = {
             one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
             Therefore, the number +4 on the top image (the dark gray square) represents <font color = 'green';>the first payoff for the dark gray square </font>. 
             <br><br/>
-            When you are ready, press the  <b>SPACE BAR</b> to continue. 
-            <br><br/> </div>
-          `;
-        } else {
-          return `
-          <div>Your answer was incorrect!</div>
-          <br><br/> 
           When you are ready, press the  <b>SPACE BAR</b> to continue. 
           <br><br/> 
           </div>`
@@ -717,13 +724,22 @@ var controlQuestion2Response = {
         feedback_question_2 = jsPsych.data.get().last(1).values()[0].correct;
         if(feedback_question_2){
           return `
-          <div>Your answer was correct!</div>
+          <div>Your answer was <font size=120%; font color = 'green';>correct </font>!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was <font size=120%; font color = 'red';>incorrect </font>!</div>
+          <br><br/> 
+          <div>Question 2: What does the bottom number (+9) in Round 31 represent? </div>
           <br><br/> 
             <div>Round 31 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_1.png"></img>
             <div>Round 32 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-            <div> Question 2: What does the bottom number (+9) in Round 31 represent? 
+            <div> 
             <br><br/>
             The payoff is not relevant to the task <br>
             The first payoff for the white square <br>
@@ -738,13 +754,6 @@ var controlQuestion2Response = {
             one immediately after your choice (always the top image) and one in the next round (always the bottom image). <br>
             Therefore, the number +9 on the bottom image (the white square) represents  <font color = 'green';>the second payoff for the white square </font>. 
             <br><br/>
-          When you are ready, press the  <b>SPACE BAR</b> to continue. 
-          <br><br/> 
-          </div>`;
-        } else {
-          return `
-          <div>Your answer was incorrect!</div>
-          <br><br/> 
           When you are ready, press the  <b>SPACE BAR</b> to continue. 
           <br><br/> 
           </div>`
@@ -811,13 +820,22 @@ var controlQuestion3Response = {
         feedback_question_3 = jsPsych.data.get().last(1).values()[0].correct;
         if(feedback_question_3){
           return `
-          <div>Your answer was correct!</div>
+          <div>Your answer was <font size=120%; font color = 'green';>correct </font>!</div>
+            <br><br/>
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was <font size=120%; font color = 'red';>incorrect </font>!</div>
+          <br><br/> 
+          <div> Question 3: What is your total payoff for Round 31? </div>
           <br><br/> 
             <div>Round 31 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_1.png"></img>
             <div>Round 32 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-            <div> Question 3: What is your total payoff for Round 31? 
+            <div>  
             <br><br/>
             4 <br>
             9 <br>
@@ -830,13 +848,6 @@ var controlQuestion3Response = {
             + 4 as the first payoff for the dark gray square chosen in that round.<br>
             + 9 as the second payoff for the white square chosen in the previous round.<br>
             Your total payoff is therefore: 4 + 9 = <font color = 'green';> 13 </font>.
-            <br><br/>
-          When you are ready, press the  <b>SPACE BAR</b> to continue. 
-          <br><br/> 
-          </div>`;
-        } else {
-          return `
-          <div>Your answer was incorrect!</div>
           <br><br/> 
           When you are ready, press the  <b>SPACE BAR</b> to continue. 
           <br><br/> 
@@ -904,13 +915,22 @@ var controlQuestion4Response = {
         feedback_question_4 = jsPsych.data.get().last(1).values()[0].correct;
         if(feedback_question_4){
           return `
-          <div>Your answer was correct!</div>
+          <div>Your answer was <font size=120%; font color = 'green';>correct </font>!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was <font size=120%; font color = 'red';>incorrect </font>!</div>
+          <br><br/> 
+          <div>Question 4: What is the total payoff of the dark gray square from Round 31 and Round 32? </div>
           <br><br/> 
             <div>Round 31 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_1.png"></img>
             <div>Round 32 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-            <div> Question 4: What is the total payoff of the dark gray square from Round 31 and Round 32? 
+            <div> 
             <br><br/>
             12 <br>
             16 <br>
@@ -923,13 +943,6 @@ var controlQuestion4Response = {
             The dark gray square gives you + 4 in round 31 and + 8 in round 32. <br>
             Therefore, the total payoff for the dark gray square is <font color = 'green';> 12 </font>.
             <br><br/>
-          When you are ready, press the  <b>SPACE BAR</b> to continue. 
-          <br><br/> 
-          </div>`;
-        } else {
-          return `
-          <div>Your answer was incorrect!</div>
-          <br><br/> 
           When you are ready, press the  <b>SPACE BAR</b> to continue. 
           <br><br/> 
           </div>`
@@ -995,13 +1008,22 @@ var controlQuestion5Response = {
         feedback_question_5 = jsPsych.data.get().last(1).values()[0].correct;
         if(feedback_question_5){
           return `
-          <div>Your answer was correct!</div>
+          <div>Your answer was <font size=120%; font color = 'green';>correct </font>!</div>
+          <br><br/> 
+          When you are ready, press the  <b>SPACE BAR</b> to continue. 
+          <br><br/> 
+          </div>`;
+        } else {
+          return `
+          <div>Your answer was <font size=120%; font color = 'red';>incorrect </font>!</div>
+          <br><br/> 
+          <div> Question 5: What was chosen in Round 32? </div>
           <br><br/> 
             <div>Round 31 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_1.png"></img>
             <div>Round 32 – Feedback screen</div>
             <img class = 'img_questions' src="img/control/control_img_2.png"></img>
-            <div> Question 5: What was chosen in Round 32? 
+            <div> 
             <br><br/>
             The dark gray square <br>
             The light gray square 
@@ -1013,13 +1035,6 @@ var controlQuestion5Response = {
             In round 32, it can be inferred from the feedback screen that <font color = 'green';> the light gray square </font> was chosen in that round <br>
             and the dark gray square was chosen in the previous round. 
             <br><br/>
-          When you are ready, press the  <b>SPACE BAR</b> to continue. 
-          <br><br/> 
-          </div>`;
-        } else {
-          return `
-          <div>Your answer was incorrect!</div>
-          <br><br/> 
           When you are ready, press the  <b>SPACE BAR</b> to continue. 
           <br><br/> 
           </div>`
@@ -1123,6 +1138,7 @@ var choiceOverview = {
     choices: ['spacebar'],
     post_trial_gap: 500,
     on_finish: function () {
+        webgazer.resume(),
         document.body.style.cursor = 'none';
         img_pairs = get_images();
     }
@@ -1142,6 +1158,7 @@ var recalibrationInstruction = {
     choices: ['spacebar'],
     post_trial_gap: 500
 };
+
 
 var recalibration = {
     timeline: [
@@ -1727,10 +1744,11 @@ var breaktime = {
     choices: ['spacebar'],
     on_start: function () {
         webgazer.pause(),
-            webgazer.clearData()
+        webgazer.clearData()
     },
     post_trial_gap: 500,
 };
+
 
 var recalibrationInstruction2 = {
     type: "html-keyboard-response",
@@ -1744,18 +1762,20 @@ var recalibrationInstruction2 = {
 };
 
 
-
 var recalibration2 = {
     timeline: [
         recalibrationInstruction2,
         {
             type: "eye-tracking",
+            doInit: () => init_flag(),
+            IsInterTrial: true,
             doCalibration: true,
-            calibrationDots: realCaliDot, ///change to 12
+            calibrationDots: realCaliDot, // change to 12
             calibrationDuration: 3,
             doValidation: true,
-            validationDots: realCaliDot, ///change to 6 - used to be 8
+            validationDots: realCaliDot,// change to 12
             validationDuration: 2,
+            validationTol: 200
         }
     ],
 };
@@ -1974,7 +1994,7 @@ function getPayoffEarned(points_earned){
     const minPayoff = 2.5; // min earnings = 2.5
     const thresholdPay = 1505;
     var payoff_earned = [];
-    payoff_earned = 0.03*(points_earned - thresholdPay); // max earnings - max possible points 350
+    payoff_earned = 0.02*(points_earned - thresholdPay); // max earnings - max possible points 350
     if(payoff_earned<=minPayoff) {
         return minPayoff;
     } else {
