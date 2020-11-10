@@ -222,10 +222,26 @@ function genSequence(a, b, c, d, e, f) {
     return shuffledOutput;
 };
 
+// random shuffle of levels for payoffs and images
+var randLevels = jsPsych.randomization.shuffle([0,1,2,3,4,5]);
+
+// generate placeholder sequence
+var shuffledSequence = genSequence(randLevels[0],randLevels[1],randLevels[2],randLevels[3],randLevels[4],randLevels[5]);
+
 // randomize the payoffs for each participant
-var payoff_shuffle = jsPsych.randomization.shuffle(payoff_levels);
+// var payoff_shuffle = jsPsych.randomization.shuffle(payoff_levels);
 // select the payoffs according to the sequence
-var payoffs_base = genSequence(payoff_shuffle[0], payoff_shuffle[1], payoff_shuffle[2], payoff_shuffle[3], payoff_shuffle[4], payoff_shuffle[5]);
+// var payoffs_base = genSequence(payoff_shuffle[0], payoff_shuffle[1], payoff_shuffle[2], payoff_shuffle[3], payoff_shuffle[4], payoff_shuffle[5]);
+
+function get_payoffs_base(shuffledSequence,payoff_levels){
+    var payoffs_base = [];
+    for (var i = 0; i < shuffledSequence.length; i++){
+        payoffs_base.push([payoff_levels[shuffledSequence[i][0]],payoff_levels[shuffledSequence[i][1]]]);
+    }
+    return payoffs_base;
+}
+
+var payoffs_base = get_payoffs_base(shuffledSequence,payoff_levels);
 
 function reshapePayoff(selectedItems) {
     var reshapedItems = [];
@@ -274,16 +290,25 @@ payoffs_shown = reshapePayoff(payoffs_shown);
 //  getCol(array, 0); //Get first column
 
 
-var get_images = function () {
+var get_images = function (shuffledSequence,fractal_images) {
+    var color_sequence = [];
     var color_cycle = [0, 1, 2, 3, 4, 5]
     // randomize the colors for each participant
     var color_shuffle = jsPsych.randomization.shuffle(color_cycle);
+    var fractal_shuffle = [];
+    for (var k = 0; k < 6; k++){
+        fractal_shuffle.push(fractal_images[color_shuffle[k]])
+    }
     // select the image url according to the sequence
-    var color_sequence = genSequence(fractal_images[color_shuffle[0]], fractal_images[color_shuffle[1]],
-        fractal_images[color_shuffle[2]], fractal_images[color_shuffle[3]], fractal_images[color_shuffle[4]],
-        fractal_images[color_shuffle[5]]);
+    for (var i = 0; i < shuffledSequence.length; i++){
+        color_sequence.push([fractal_shuffle[shuffledSequence[i][0]],fractal_shuffle[shuffledSequence[i][1]]]);
+    }
+    // var color_sequence = genSequence(fractal_images[color_shuffle[0]], fractal_images[color_shuffle[1]],
+    //     fractal_images[color_shuffle[2]], fractal_images[color_shuffle[3]], fractal_images[color_shuffle[4]],
+    //     fractal_images[color_shuffle[5]]);
     return color_sequence;
 };
+
 
 
 // function makeSurveyCode(status) {
@@ -1140,7 +1165,7 @@ var choiceOverview = {
     on_finish: function () {
         webgazer.resume(),
         document.body.style.cursor = 'none';
-        img_pairs = get_images();
+        img_pairs = get_images(shuffledSequence,fractal_images);
     }
 }
 
@@ -1822,6 +1847,7 @@ var learning_choice_2 = {
             stimulus_bottom_payoff_base: () => pointsBaseLast[1],
             stimulus_bottom_payoff_noise: () => pointsNoiseLast[1],
             on_finish: function () {
+                feedback_data.push(data)
                 feedback_count++;
             },
             timing_response: feedbackDuration
