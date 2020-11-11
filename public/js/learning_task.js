@@ -1216,9 +1216,10 @@ var rand_choices = getRandomChoices(payoffs_shown.length);
 
 // get images for feedback phase
 function getChoiceImg(img_choices){
+    // note: for choice_count not in terms of keypress but in terms of what was shown before
     if(choice_count!==0){
-        var r0 = [];
-        var r1 = [];
+        var r0 = []; // choice on previous trial
+        var r1 = []; // choice on current trial
         // left 
         if(img_choices[choice_count-1].key_press === 37){
             if(img_choices[choice_count].key_press === 37){
@@ -1258,10 +1259,10 @@ function getChoiceImg(img_choices){
         // no choice
         if(img_choices[choice_count-1].key_press !== 39 && img_choices[choice_count-1].key_press !== 37){
             if(rand_choices[choice_count-1]===0){
-                r0 = img_choices[choice_count].left_stimulus;
+                r0 = img_choices[choice_count-1].left_stimulus;
             }
             if(rand_choices[choice_count-1]===1){
-                r0 = img_choices[choice_count].right_stimulus;
+                r0 = img_choices[choice_count-1].right_stimulus;
             }
             //replace with random selection
             if(img_choices[choice_count].key_press === 37){
