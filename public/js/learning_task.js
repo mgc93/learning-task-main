@@ -1,7 +1,5 @@
 /** to do list */
 // main version
-// update payment per point
-// check for an error in the code: feedback at start of part 2 the same image!
 // check if eyetracking data is saved correctly
 
 
@@ -23,7 +21,7 @@ const feedbackDuration = 2000;
 var subject_id = jsPsych.randomization.randomID(7);
 
 var payFailQuiz = '50c';
-var payFailCalibration = '50c';
+var payFailCalibration = '75c';
 
 
 function getRandomInt(min, max) {
@@ -228,11 +226,7 @@ var randLevels = jsPsych.randomization.shuffle([0,1,2,3,4,5]);
 // generate placeholder sequence
 var shuffledSequence = genSequence(randLevels[0],randLevels[1],randLevels[2],randLevels[3],randLevels[4],randLevels[5]);
 
-// randomize the payoffs for each participant
-// var payoff_shuffle = jsPsych.randomization.shuffle(payoff_levels);
 // select the payoffs according to the sequence
-// var payoffs_base = genSequence(payoff_shuffle[0], payoff_shuffle[1], payoff_shuffle[2], payoff_shuffle[3], payoff_shuffle[4], payoff_shuffle[5]);
-
 function get_payoffs_base(shuffledSequence,payoff_levels){
     var payoffs_base = [];
     for (var i = 0; i < shuffledSequence.length; i++){
@@ -257,6 +251,7 @@ function reshapePayoff(selectedItems) {
     return reshapedItemsFinal;
 }
 
+// generate noise for each payoff
 function genEpsilon() {
     var repeatedItems = [].concat(...Array(52 * 2).fill([0, 1, 2, 3]));
     repeatedItems.push(0, 3, 0, 3);
@@ -289,7 +284,7 @@ payoffs_shown = reshapePayoff(payoffs_shown);
 //  var array = [new Array(20), new Array(20), new Array(20)]; //..your 3x20 array
 //  getCol(array, 0); //Get first column
 
-
+// select images for the sequence
 var get_images = function (shuffledSequence,fractal_images) {
     var color_sequence = [];
     var color_cycle = [0, 1, 2, 3, 4, 5]
@@ -309,13 +304,6 @@ var get_images = function (shuffledSequence,fractal_images) {
     return color_sequence;
 };
 
-
-
-// function makeSurveyCode(status) {
-//     uploadSubjectStatus(status);
-//     var prefix = { 'success': 'cg', 'failed': 'sb' }[status]
-//     return `${prefix}${subject_id}`;
-// }
 
 function makeSurveyCode(status) {
     uploadSubjectStatus(status);
@@ -481,7 +469,7 @@ var inital_eye_calibration = {
                     if (!success && calibrationAttempt == calibrationMax) {
                         survey_code = makeSurveyCode('failed');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration}. Thank you for signing up!`);
                     }
                 }
             }
@@ -1612,7 +1600,7 @@ function binary_choice_state_logger(finish_data_accuracy) {
         },
             validate_counter = 0;
     }
-    if (finish_data_accuracy < validationAccuracy & validate_counter <= 2) {
+    if (finish_data_accuracy < validationAccuracy & validate_counter <= 4) {
         binary_choice_states = {
             doCalibration: false,
             dovalidation: true,
@@ -1620,7 +1608,7 @@ function binary_choice_state_logger(finish_data_accuracy) {
         },
             validate_counter += 1;
     }
-    if (validate_counter == 3) {
+    if (validate_counter == 5) {
         binary_choice_states = {
             //set the default 
             doCalibration: true,
@@ -1749,7 +1737,7 @@ var learning_choice_1 = {
             stimulus_bottom_payoff_base: () => pointsBaseLast[1],
             stimulus_bottom_payoff_noise: () => pointsNoiseLast[1],
             on_finish: function (data) {
-                feedback_data.push(data)
+                feedback_data.push(data);
                 feedback_count++;
             },
             timing_response: feedbackDuration
@@ -1847,8 +1835,8 @@ var learning_choice_2 = {
             stimulus_top_payoff_noise: () => pointsNoiseLast[0],
             stimulus_bottom_payoff_base: () => pointsBaseLast[1],
             stimulus_bottom_payoff_noise: () => pointsNoiseLast[1],
-            on_finish: function () {
-                feedback_data.push(data)
+            on_finish: function (data) {
+                feedback_data.push(data);
                 feedback_count++;
             },
             timing_response: feedbackDuration
