@@ -616,7 +616,7 @@ var controlQuestion1 = {
         { prompt: "Question 1: What does the top number (+4) in Round 31 represent?", name: 'Q1', options: question_1_options, required: true }
     ],
     preamble: `<div> <br><br/>
-    Thanks for choosing our experiment! Please answer the following questions to begin today's study.</div>
+    </div>
     <br><br/>
     <div>Consider the following example displaying choices and payoffs from two consecutive rounds of the task.</div>
     <br><br/>
