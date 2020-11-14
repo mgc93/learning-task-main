@@ -1809,10 +1809,10 @@ var learning_choice_2 = {
             stimulus_duration: 3000, // 3000
             exp_condition: condition,
             exp_image_set: imageSet,
-            stimulus_left_payoff_base: payoffs_base[choice_count][0],
-            stimulus_left_payoff_noise: payoffs_noise[choice_count][0],
-            stimulus_right_payoff_base: payoffs_base[choice_count][1],
-            stimulus_right_payoff_noise: payoffs_noise[choice_count][1],
+            stimulus_left_payoff_base: () => payoffs_base[choice_count][0],
+            stimulus_left_payoff_noise: () => payoffs_noise[choice_count][0],
+            stimulus_right_payoff_base: () => payoffs_base[choice_count][1],
+            stimulus_right_payoff_noise: () => payoffs_noise[choice_count][1],
             on_finish: function (data) {
                 img_choices.push(data);
                 choiceImgLast = getChoiceImg(img_choices);
