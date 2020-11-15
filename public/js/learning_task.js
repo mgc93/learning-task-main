@@ -1710,6 +1710,7 @@ var learning_choice_1 = {
             stimulus_duration: 3000, // 3000
             exp_condition: condition,
             exp_image_set: imageSet,
+            random_choice: () => rand_choices[choice_count],
             stimulus_left_payoff_base: () => payoffs_base[choice_count][0],
             stimulus_left_payoff_noise: () => payoffs_noise[choice_count][0],
             stimulus_right_payoff_base: () => payoffs_base[choice_count][1],
@@ -1809,6 +1810,7 @@ var learning_choice_2 = {
             stimulus_duration: 3000, // 3000
             exp_condition: condition,
             exp_image_set: imageSet,
+            random_choice: () => rand_choices[choice_count],
             stimulus_left_payoff_base: () => payoffs_base[choice_count][0],
             stimulus_left_payoff_noise: () => payoffs_noise[choice_count][0],
             stimulus_right_payoff_base: () => payoffs_base[choice_count][1],

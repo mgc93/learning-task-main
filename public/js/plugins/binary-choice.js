@@ -60,6 +60,12 @@ jsPsych.plugins["binary-choice"] = (function () {
         default: 0,
         description: 'Image set used in the experiment.'
       },
+      random_choice: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'random_choice',
+        default: 0,
+        description: 'Choice in case the participant did not choose.'
+      },
       stimulus_left_payoff_base: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'stimulus_payoff_base',
@@ -221,6 +227,7 @@ jsPsych.plugins["binary-choice"] = (function () {
         "right_stimulus": trial.stimulus[1],
         "exp_condition": trial.exp_condition,
         "exp_image_set": trial.exp_image_set,
+        "random_choice": trial.random_choice,
         "stimulus_left_payoff_base": trial.stimulus_left_payoff_base,
         "stimulus_left_payoff_noise": trial.stimulus_left_payoff_noise,
         "stimulus_right_payoff_base": trial.stimulus_right_payoff_base,
