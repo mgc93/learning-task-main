@@ -35,7 +35,7 @@ var imageSet = getRandomInt(1,2);
 
 /** load instructions images */
 var instructions_images = [];
-for (var i = 1; i < 14; i++) {
+for (var i = 1; i < 12; i++) {
     instructions_images.push('img/instructions1/Slide' + i + '.png');
 }
 
