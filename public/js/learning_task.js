@@ -21,7 +21,8 @@ const feedbackDuration = 2000;
 var subject_id = jsPsych.randomization.randomID(7);
 
 var payFailQuiz = '50c';
-var payFailCalibration = '75c';
+var payFailCalibration1 = '10c';
+var payFailCalibration2 = '75c';
 
 
 function getRandomInt(min, max) {
@@ -414,7 +415,7 @@ var eyeTrackingNote = {
             If you are back on this page, it means the calibration and validation did not work as well as we would like.  <br/>
             Please read the tips above again, make any adjustments, and try again.  <br/>
             There are only <b>THREE</b> chances to get this right.  <br/>
-            Otherwise, the study cannot proceed and you will only receive 50 cents for participating.  </font><br/>
+            Otherwise, the study cannot proceed and you will only receive a small pay for participating.  </font><br/>
             <br><br/>
              <font size=5px; >When you are ready, press the <b>SPACE BAR</b> to bring up the video feed and make these adjustments. </font></div>`,
     post_trial_gap: 500,
@@ -469,7 +470,7 @@ var inital_eye_calibration = {
                     if (!success && calibrationAttempt == calibrationMax) {
                         survey_code = makeSurveyCode('failed');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 10 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration1}. Thank you for signing up!`);
                     }
                 }
             }
@@ -1172,22 +1173,43 @@ var recalibrationInstruction = {
     post_trial_gap: 500
 };
 
+var recalibrationMax = 3;
+var recalibrationAttempt = 0;
+var resuccess = false; //update if there's a success
 
 var recalibration = {
     timeline: [
         recalibrationInstruction,
         {
             type: "eye-tracking",
+            doInit: () => init_flag(),
+            IsInterTrial: true,
             doCalibration: true,
             calibrationDots: realCaliDot, // change to 12
             calibrationDuration: 3,
             doValidation: true,
             validationDots: realCaliDot,// change to 12
             validationDuration: 2,
-            validationTol: 200
+            validationTol: validationTols[recalibrationAttempt],
+            on_finish: function (data) {
+                console.log(JSON.parse(data.validationPoints)[0].hitRatio == null);
+                if (JSON.parse(data.validationPoints)[0].hitRatio == null) {
+                    jsPsych.endExperiment('The study has ended. You may have exited full screen mode, or your browser may not be compatible with our study.');
+                } else {
+                    recalibrationAttempt++;
+                    if (data.accuracy >= validationAccuracys[recalibrationAttempt - 1]) resuccess = true;
+                    if (!resuccess && recalibrationAttempt == recalibrationMax) {
+                        survey_code = makeSurveyCode('failed');
+                        closeFullscreen();
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration2}. Thank you for signing up!`);
+                    }
+                }
+            }
         }
     ],
+    loop_function: () => (recalibrationAttempt < recalibrationMax) && (!resuccess),
 };
+
 
 
 
@@ -2149,6 +2171,9 @@ function startExperiment() {
         timeline: [
             start_exp_survey_trial,
             fullscreenEnter,
+            eyeTrackingInstruction1, 
+            eyeTrackingInstruction2, 
+            inital_eye_calibration,
             learningTaskInstructions,
             controlQuizOverview,
             controlQuestion1,
@@ -2161,9 +2186,10 @@ function startExperiment() {
             controlQuestion4Response,
             controlQuestion5,
             controlQuestion5Response,
-            eyeTrackingInstruction1, 
-            eyeTrackingInstruction2, 
-            inital_eye_calibration,
+            // eyeTrackingInstruction1, 
+            // eyeTrackingInstruction2, 
+            // inital_eye_calibration,
+            recalibration,
             experimentOverview,
             learningTaskInstructionsSet,
             choiceInstructionReinforce,
