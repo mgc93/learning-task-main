@@ -428,7 +428,7 @@ var eyeTrackingNote = {
 
 
 //eye tracking parameters
-var calibrationMax = 3;
+var calibrationMax = 1;
 var calibrationAttempt = 0;
 var success = false; //update if there's a success
 var eye_calibration_state = {
@@ -441,8 +441,8 @@ var init_flag = function () {
     } else return false;
 };
 
-var validationTols = [130, 165, 200];
-var validationAccuracys = [0.8, 0.7, 0.6];
+var validationTols = [200];
+var validationAccuracys = [0.6];
 
 /** first we need a calibration and validation step before entering into the main choice task */
 var inital_eye_calibration = {
