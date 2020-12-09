@@ -20,9 +20,9 @@ const feedbackDuration = 2000;
 
 var subject_id = jsPsych.randomization.randomID(7);
 
-var payFailQuiz = '50c';
-var payFailCalibration1 = '10c';
-var payFailCalibration2 = '75c';
+var payFailQuiz = '75c';
+var payFailCalibration1 = '50c';
+var payFailCalibration2 = '200c';
 
 
 function getRandomInt(min, max) {
@@ -470,7 +470,7 @@ var inital_eye_calibration = {
                     if (!success && calibrationAttempt == calibrationMax) {
                         survey_code = makeSurveyCode('failed');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 10 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration1}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration1}. Thank you for signing up!`);
                     }
                 }
             }
@@ -1061,7 +1061,7 @@ var controlQuestion5Response = {
         if(nCorrect<4){
             survey_code = makeSurveyCode('failed');
             closeFullscreen();
-            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailQuiz}. Thank you for signing up!`);
+            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailQuiz}. Thank you for signing up!`);
         }
     }
 }
@@ -1201,7 +1201,7 @@ var recalibration = {
                     if (!resuccess && recalibrationAttempt == recalibrationMax) {
                         survey_code = makeSurveyCode('failed');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration2}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 2 dollars for making it this far. Your survey code is: ${survey_code}${payFailCalibration2}. Thank you for signing up!`);
                     }
                 }
             }
@@ -2030,7 +2030,7 @@ function getPointsEarned(img_choices,payoffs_shown){
 }
 
 function getPayoffEarned(points_earned){
-    const minPayoff = 2.5; // min earnings = 2.5
+    const minPayoff = 4.5; // min earnings = 2.5 + 2 from passing everything
     const thresholdPay = 1505;
     var payoff_earned = [];
     payoff_earned = 0.02*(points_earned - thresholdPay); // max earnings - max possible points 350
