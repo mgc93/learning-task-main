@@ -1,7 +1,7 @@
 /** to do list */
-// main version
-// check if eyetracking data is saved correctly
+// condition 1
 
+// copy paste condition 2
 
 /**************/
 /** Constants */
@@ -30,7 +30,7 @@ function getRandomInt(min, max) {
 }
 
 // choose randomly the condition for the subject
-var condition = getRandomInt(1,2);
+var condition = 1; //getRandomInt(1,2);
 var imageSet = getRandomInt(1,2);
 
 
@@ -326,11 +326,44 @@ function uploadSubjectStatus(status) {
 /******** Trials *******/
 /***********************/
 
+/** full screen */
+var paymentInfo = {
+    type: 'html-keyboard-response',
+    stimulus: `<div> In order to receive payment for this study, you will need to provide Venmo/Paypal or Zelle information. <br/>
+                <br><br/>
+                When you are ready, press the SPACE BAR to continue. </div>`,
+    post_trial_gap: 500,
+    choices: ['spacebar'],
+};
+
+var payment_options = ["Venmo",
+                        "Paypal",
+                        "Zelle"];
+
+var payment_data = [];
+                        
+var paymentQuestion = {
+    type: 'survey-multi-choice',
+    questions: [
+        { prompt: "How would you like to be paid?", name: 'Payment', options: payment_options, required: true }
+    ],
+    on_finish: function (data) {
+        payment_data.push(data);
+    }
+}
+
+var personalInfoQuestion = {
+    type: 'survey-text',
+    questions: [
+        { prompt: "What is your name?", rows: 1, columns: 50, required: true },
+        { prompt: "What is the account name or email address associated with your Venmo/Paypal/Zelle account? ", rows: 1, columns: 50, required: true },
+    ],
+    preamble: `<div>Please answer the following questions. </div>`,
+};
 
 var start_exp_survey_trial = {
     type: 'survey-text',
     questions: [
-        { prompt: "What's your worker ID?", rows: 2, columns: 50, required: true },
         { prompt: "What's your age?", rows: 1, columns: 50, required: true },
         { prompt: "What's your gender?", rows: 1, columns: 50, require: true },
     ],
@@ -2030,10 +2063,10 @@ function getPointsEarned(img_choices,payoffs_shown){
 }
 
 function getPayoffEarned(points_earned){
-    const minPayoff = 4.5; // min earnings = 2.5 + 2 from passing everything
+    const minPayoff = 9; // min earnings = 2.5 + 2 from passing everything - 9 now
     const thresholdPay = 1505;
     var payoff_earned = [];
-    payoff_earned = 0.02*(points_earned - thresholdPay); // max earnings - max possible points 350
+    payoff_earned = 0.04*(points_earned - thresholdPay); // max earnings - max possible points 350
     if(payoff_earned<=minPayoff) {
         return minPayoff;
     } else {
@@ -2091,7 +2124,7 @@ function getRandomInt(min, max) {
 
 var pay = 0;
 var points = 0;
-var successExp = false
+var successExp = false;
 var success_guard = {
     type: 'call-function',
     func: () => { 
@@ -2169,6 +2202,9 @@ var trialcounter;
 function startExperiment() {
     jsPsych.init({
         timeline: [
+            paymentInfo,
+            paymentQuestion,
+            personalInfoQuestion,
             start_exp_survey_trial,
             fullscreenEnter,
             eyeTrackingInstruction1, 
@@ -2209,11 +2245,11 @@ function startExperiment() {
             trialcounter = jsPsych.data.get().count();
             if (successExp) {
                 closeFullscreen()
+                survey_code = makeSurveyCode('success');
                 document.body.style.cursor = 'pointer'
                 jsPsych.endExperiment(`<div>
                 Thank you for your participation! You can close the browser to end the experiment now. </br>
                 The webcam will turn off when you close the browser. </br>
-                Your survey code is: ${makeSurveyCode('success')}${pay*100} </br>
                 We will send you $ ${pay} as your participant fee soon! </br> 
                 </div>`);
             }
@@ -2228,6 +2264,10 @@ function startExperiment() {
 
     });
 };
+
+
+// no longer needed 
+// Your survey code is: ${makeSurveyCode('success')}${pay*100} </br>
 
 function saveData() {
     var xhr = new XMLHttpRequest();
