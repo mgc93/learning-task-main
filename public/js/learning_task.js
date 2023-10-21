@@ -1,6 +1,11 @@
 /** to do list */
 // condition 1
 
+// replace validation Tolerance - here just for testing set very low
+// replace validaction accuracy
+// replace realCaliDot
+// lines 476 and 1647
+// replace consent form
 
 /**************/
 /** Constants */
@@ -11,11 +16,11 @@
 // const nprac = 3;
 const nImageInst = 2;
 const debugModeCaliDot = 1;
-const realCaliDot = 12; // 12
+const realCaliDot = 3; // 12
 
 // const feedback_duration = 3000;
 const maxTimeChoice = 3000;
-const feedbackDuration = 2000;
+const feedbackDuration = 2000*3; // 2000;
 
 var subject_id = jsPsych.randomization.randomID(7);
 
@@ -473,8 +478,8 @@ var init_flag = function () {
     } else return false;
 };
 
-var validationTols = [200];
-var validationAccuracys = [0.6];
+var validationTols = [500]; // [200];
+var validationAccuracys = [0.01]; // [0.6]; 
 
 /** first we need a calibration and validation step before entering into the main choice task */
 var inital_eye_calibration = {
@@ -1642,7 +1647,7 @@ var binary_choice_states = {
 };
 
 var validate_counter = 0;
-validationAccuracy = 0.6;
+validationAccuracy = 0.01; //0.6;
 
 function binary_choice_state_logger(finish_data_accuracy) {
     // ...TODO
@@ -1780,7 +1785,7 @@ var learning_choice_1 = {
         },
         fixation2,
         {
-            type: "binary-feedback",
+            type: "binary-feedback-rev",
             stimulus: () => choiceImgLast,
             points: () => pointsImgLast,
             choices: jsPsych.NO_KEYS,
@@ -1880,7 +1885,7 @@ var learning_choice_2 = {
         },
         fixation2,
         {
-            type: "binary-feedback",
+            type: "binary-feedback-rev",
             stimulus: () => choiceImgLast,
             points: () => pointsImgLast,
             choices: jsPsych.NO_KEYS,
@@ -2201,35 +2206,31 @@ var trialcounter;
 function startExperiment() {
     jsPsych.init({
         timeline: [
-            paymentInfo,
-            paymentQuestion,
-            personalInfoQuestion,
+            //paymentInfo,
+            //paymentQuestion,
+            //personalInfoQuestion,
             start_exp_survey_trial,
             fullscreenEnter,
-            eyeTrackingInstruction1, 
-            eyeTrackingInstruction2, 
-            inital_eye_calibration,
-            learningTaskInstructions,
-            controlQuizOverview,
-            controlQuestion1,
-            controlQuestion1Response,
-            controlQuestion2,
-            controlQuestion2Response,
-            controlQuestion3,
-            controlQuestion3Response,
-            controlQuestion4,
-            controlQuestion4Response,
-            controlQuestion5,
-            controlQuestion5Response,
-            // eyeTrackingInstruction1, 
-            // eyeTrackingInstruction2, 
-            // inital_eye_calibration,
+            //eyeTrackingInstruction1, 
+            //eyeTrackingInstruction2, 
+            //inital_eye_calibration,
+            // learningTaskInstructions,
+            // controlQuizOverview,
+            // controlQuestion1,
+            // controlQuestion1Response,
+            // controlQuestion2,
+            // controlQuestion2Response,
+            // controlQuestion3,
+            // controlQuestion3Response,
+            // controlQuestion4,
+            // controlQuestion4Response,
+            // controlQuestion5,
+            // controlQuestion5Response,
             recalibration,
             experimentOverview,
             learningTaskInstructionsSet,
             choiceInstructionReinforce,
             choiceOverview,
-            // recalibration,
             learning_choice_1,
             breaktime,
             recalibration2,
