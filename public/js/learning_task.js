@@ -32,9 +32,9 @@ const feedbackDuration = 2000; // 2000;
 var subject_id = jsPsych.randomization.randomID(7);
 
 var survey_code = ''; 
-var payFailQuiz = '3 dollars'; //'75c';
-var payFailCalibration1 = '2 dollars'; //'50c';
-var payFailCalibration2 = '4 dollars'; //'200c';
+var payFailQuiz = '3dollars'; //'75c';
+var payFailCalibration1 = '2dollars'; //'50c';
+var payFailCalibration2 = '4dollars'; //'200c';
 
 var passedQuiz = 1;
 var passedShortCalibration = 1;
@@ -2284,10 +2284,10 @@ function startExperiment() {
             //personalInfoQuestion,
             fullscreenEnter,
             experimentOverview,
-            //eyeTrackingInstruction1, 
-            //eyeTrackingInstruction2, 
-            //inital_eye_calibration,
-            // learningTaskInstructions,
+            eyeTrackingInstruction1, 
+            eyeTrackingInstruction2, 
+            inital_eye_calibration,
+            learningTaskInstructions,
             controlQuizOverview,
             controlQuestion1,
             controlQuestion1Response,
