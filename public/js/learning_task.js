@@ -6,6 +6,13 @@
 // replace realCaliDot
 // lines 476 and 1647
 // replace consent form
+// (done) turn feedback back to 2s
+// investigate why images for choice only appear after choice for the first few trials
+// back to full number of trils: 63 line 1808
+// (done) add prolific changes
+// (done) check code for remaining in fullscreen
+// change instructions
+
 
 /**************/
 /** Constants */
@@ -20,14 +27,18 @@ const realCaliDot = 3; // 12
 
 // const feedback_duration = 3000;
 const maxTimeChoice = 3000;
-const feedbackDuration = 2000*3; // 2000;
+const feedbackDuration = 2000; // 2000;
 
 var subject_id = jsPsych.randomization.randomID(7);
 
-var payFailQuiz = '300c'; //'75c';
-var payFailCalibration1 = '200c'; //'50c';
-var payFailCalibration2 = '400c'; //'200c';
+var survey_code = ''; 
+var payFailQuiz = '3 dollars'; //'75c';
+var payFailCalibration1 = '2 dollars'; //'50c';
+var payFailCalibration2 = '4 dollars'; //'200c';
 
+var passedQuiz = 1;
+var passedShortCalibration = 1;
+var passedLongCalibration = 1;
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -310,9 +321,15 @@ var get_images = function (shuffledSequence,fractal_images) {
 };
 
 
+// function makeSurveyCode(status) {
+//     uploadSubjectStatus(status);
+//     var prefix = { 'success': 'cg', 'failed': 'sb' }[status]
+//     return `${prefix}${subject_id}`;
+// }
+
 function makeSurveyCode(status) {
     uploadSubjectStatus(status);
-    var prefix = { 'success': 'cg', 'failed': 'sb' }[status]
+    var prefix = { 'success': 'cg', 'failed_short_calibration': 'fs','failed_quiz':'fq', 'failed_long_calibration': 'fl' }[status]
     return `${prefix}${subject_id}`;
 }
 
@@ -365,7 +382,7 @@ var personalInfoQuestion = {
     preamble: `<div>Please answer the following questions. </div>`,
 };
 
-var start_exp_survey_trial = {
+var surveyQuestion = {
     type: 'survey-text',
     questions: [
         { prompt: "What's your age?", rows: 1, columns: 50, required: true },
@@ -374,6 +391,7 @@ var start_exp_survey_trial = {
     preamble: `<div>Thanks for choosing our experiment! Please answer the following questions to begin today's study. </div>`,
 };
 
+var should_be_in_fullscreen = false;
 
 
 /** full screen */
@@ -387,10 +405,26 @@ var fullscreenEnter = {
     The study will switch to full screen mode when you press the button below.  <br/>
     When you are ready to begin, press the button.</div>`,
     fullscreen_mode: true,
+    on_start: function() {
+        should_be_in_fullscreen = true; // once this trial starts, the participant should be in fullscreen
+    },
     on_finish: function () {
         document.body.style.cursor = 'none'
     }
 };
+
+
+var experimentOverview = {
+    type: 'html-keyboard-response',
+    stimulus: `<div> <font size=120%; font color = 'green';>Experiment Overview </font><br/>
+                                                     <br><br/>
+                          Now, we will begin with the study.<br/>
+                                                        <br><br/>
+                          When you are ready, press the  <b>SPACE BAR</b> to continue. </div>`,
+    choices: ['spacebar'],
+    post_trial_gap: 500,
+    on_finish: () => document.body.style.cursor = 'pointer',
+}
 
 
 var eyeTrackingInstruction1 = {
@@ -435,7 +469,6 @@ var eyeTrackingInstruction2 = {
 }
 
 var eyeTrackingNote = {
-
     type: 'html-keyboard-response',
     stimulus: `<div><font size=120%; font color = 'green';> Calibration & Validation</font><br/>
                                                                           <br><br/>
@@ -505,9 +538,16 @@ var inital_eye_calibration = {
                     calibrationAttempt++;
                     if (data.accuracy >= validationAccuracys[calibrationAttempt - 1]) success = true;
                     if (!success && calibrationAttempt == calibrationMax) {
-                        survey_code = makeSurveyCode('failed');
+                        should_be_in_fullscreen = false;
+                        survey_code = makeSurveyCode('failed_short_calibration');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 50 cents for making it this far. Your survey code is: ${survey_code}${payFailCalibration1}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`We are sorry! Unfortunately, the webcam calibration has failed.  We can't proceed with the study.  
+                        <br><br/>
+                        Please RETURN YOUR SUBMISSION by closing the survey and clicking <span style="color:cyan;">'Stop Without Completing'</span> on Prolific.<br/>
+                        You will get ${payFailCalibration1} for making it this far.
+                        <br><br/>
+                        Thank you for signing up!`);
+                        passedShortCalibration = 0;
                     }
                 }
             }
@@ -1096,9 +1136,17 @@ var controlQuestion5Response = {
     on_finish: function (data) {
         nCorrect = getAnswersQuiz(questions_data);
         if(nCorrect<4){
-            survey_code = makeSurveyCode('failed');
+            should_be_in_fullscreen = false;
+            survey_code = makeSurveyCode('failed_quiz');
             closeFullscreen();
-            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  </br> You will receive 75 cents for making it this far. Your survey code is: ${survey_code}${payFailQuiz}. Thank you for signing up!`);
+            jsPsych.endExperiment(`We are sorry! Unfortunately, you have answered only ${nCorrect} questions correctly.  
+            </br> You will receive ${payFailQuiz} for making it this far. 
+            <br><br/>
+            Your completion code is <span style="color:cyan;">xxxxxx1</span>.<br/>
+            Make sure you copy this code in order to get paid!
+            <br><br/>
+            Thank you for signing up!`);
+            passedQuiz = 0;
         }
     }
 }
@@ -1236,9 +1284,17 @@ var recalibration = {
                     recalibrationAttempt++;
                     if (data.accuracy >= validationAccuracys[recalibrationAttempt - 1]) resuccess = true;
                     if (!resuccess && recalibrationAttempt == recalibrationMax) {
-                        survey_code = makeSurveyCode('failed');
+                        should_be_in_fullscreen = false;
+                        survey_code = makeSurveyCode('failed_long_calibration');
                         closeFullscreen();
-                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  </br> You will receive 2 dollars for making it this far. Your survey code is: ${survey_code}${payFailCalibration2}. Thank you for signing up!`);
+                        jsPsych.endExperiment(`Sorry, unfortunately the webcam calibration has failed.  We can't proceed with the study.  
+                        </br> You will receive ${payFailCalibration2} for making it this far. 
+                        <br><br/>
+                        Your completion code is <span style="color:cyan;">xxxxxxx2</span>.<br/>
+                        Make sure you copy this code in order to get paid!
+                        <br><br/>
+                        Thank you for signing up!`);
+                        passedLongCalibration = 0;
                     }
                 }
             }
@@ -1647,7 +1703,7 @@ var binary_choice_states = {
 };
 
 var validate_counter = 0;
-validationAccuracy = 0.01; //0.6;
+var validationAccuracy = 0.01; //0.6;
 
 function binary_choice_state_logger(finish_data_accuracy) {
     // ...TODO
@@ -1803,7 +1859,7 @@ var learning_choice_1 = {
             timing_response: feedbackDuration
         }        
     ],
-    loop_function: () => choice_count < 63, //63
+    loop_function: () => choice_count < 5, //63
 };
 
 
@@ -2126,6 +2182,13 @@ function getRandomInt(min, max) {
 //     return html
 // }
 
+var fullscreenExit = {
+    type: 'call-function',
+    func: () => { 
+      should_be_in_fullscreen = false; // once this trial starts, the participant is no longer required to stay in fullscreen
+    }
+};
+
 var pay = 0;
 var points = 0;
 var successExp = false;
@@ -2167,6 +2230,14 @@ function closeFullscreen() {
     }
 }
 
+// get prolific ID from subjects
+
+// capture info from Prolific
+var prolific_subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+var prolific_study_id = jsPsych.data.getURLVariable('STUDY_ID');
+var prolific_session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+
 
 var on_finish_callback = function () {
     // jsPsych.data.displayData();
@@ -2174,7 +2245,9 @@ var on_finish_callback = function () {
         browser_name: bowser.name,
         browser_type: bowser.version,
         subject: subject_id,
-        subject: subject_id,
+        pass_quiz: passedQuiz,
+        pass_short_calibration: passedShortCalibration,
+        pass_long_calibration: passedLongCalibration,
         interaction: jsPsych.data.getInteractionData().json(),
         points_total: points,
         payment: pay,
@@ -2209,36 +2282,37 @@ function startExperiment() {
             //paymentInfo,
             //paymentQuestion,
             //personalInfoQuestion,
-            start_exp_survey_trial,
             fullscreenEnter,
+            experimentOverview,
             //eyeTrackingInstruction1, 
             //eyeTrackingInstruction2, 
             //inital_eye_calibration,
             // learningTaskInstructions,
-            // controlQuizOverview,
-            // controlQuestion1,
-            // controlQuestion1Response,
-            // controlQuestion2,
-            // controlQuestion2Response,
-            // controlQuestion3,
-            // controlQuestion3Response,
-            // controlQuestion4,
-            // controlQuestion4Response,
-            // controlQuestion5,
-            // controlQuestion5Response,
+            controlQuizOverview,
+            controlQuestion1,
+            controlQuestion1Response,
+            controlQuestion2,
+            controlQuestion2Response,
+            controlQuestion3,
+            controlQuestion3Response,
+            controlQuestion4,
+            controlQuestion4Response,
+            controlQuestion5,
+            controlQuestion5Response,
             recalibration,
             experimentOverview,
             learningTaskInstructionsSet,
             choiceInstructionReinforce,
             choiceOverview,
             learning_choice_1,
-            breaktime,
-            recalibration2,
-            learning_choice_2,
+            //breaktime,
+            //recalibration2,
+            //learning_choice_2,
             memoryOverview,
-            memoryQuizPart1,
-            memoryQuizPart2,
-            memoryQuizPart3,
+            //memoryQuizPart1,
+            //memoryQuizPart2,
+            //memoryQuizPart3,
+            fullscreenExit,
             success_guard
         ],
         on_trial_finish: function () {
@@ -2248,14 +2322,57 @@ function startExperiment() {
                 survey_code = makeSurveyCode('success');
                 document.body.style.cursor = 'pointer'
                 jsPsych.endExperiment(`<div>
-                Thank you for your participation! You can close the browser to end the experiment now. </br>
+                Thank you for your participation! </br>
                 The webcam will turn off when you close the browser. </br>
                 We will send you $ ${pay} as your participant fee soon! </br> 
+                <br></br>
+                Your completion code is <span style="color:cyan;">xxxxxx3</span>.<br/>
+                Make sure you copy this code in order to get paid! </br>
+                <br></br>
+                You can close the browser to end the experiment now. </br>
                 </div>`);
             }
             if (trialcounter == 21) {
                 on_finish_callback();
                 jsPsych.data.reset();
+            }
+        },
+        on_interaction_data_update: function(data){
+            if(data.event == 'fullscreenexit' && should_be_in_fullscreen){
+              console.log('exited fullscreen');
+              // hide the contents of the current trial
+              jsPsych.getDisplayElement().style.visibility = 'hidden';
+              // add a div that contains a message and button to re-enter fullscreen
+              jsPsych.getDisplayElement().insertAdjacentHTML('beforebegin',
+              '<div id="message-div" style="margin: auto; width: 100%; text-align: center; position: absolute; top: 40%;">'+
+              '<p>Please remain in fullscreen mode during the task.</p>'+
+              '<p>When you click the button below, you will enter fullscreen mode.</p>'+
+              '<button id="jspsych-fullscreen-btn" class="jspsych-btn">Continue</button></div>');
+              // call the request fullscreen function when the button is clicked
+              document.querySelector('#jspsych-fullscreen-btn').addEventListener('click', function() {
+                var element = document.documentElement;
+                if (element.requestFullscreen) {
+                  element.requestFullscreen();
+                } else if (element.mozRequestFullScreen) {
+                  element.mozRequestFullScreen();
+                } else if (element.webkitRequestFullscreen) {
+                  element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) {
+                  element.msRequestFullscreen();
+                }
+              });
+            }
+            if(data.event == 'fullscreenenter'){
+              console.log('entered fullscreen');
+              // when entering fullscreen, check to see if the participant is re-entering fullscreen, 
+              // i.e. the 'please enter fullscreen' message is on the page
+              var msg_div = document.querySelector('#message-div');
+              if (msg_div !== null) {
+                // remove the message
+                msg_div.remove(); 
+                // show the contents of the current trial again
+                jsPsych.getDisplayElement().style.visibility = 'visible';
+              }
             }
         },
         preload_images: [instructions_images, instructions_image_set, fractal_images, blank_image, control_images, memory_images, instruct_img],
