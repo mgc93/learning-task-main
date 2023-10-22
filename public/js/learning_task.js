@@ -45,7 +45,7 @@ function getRandomInt(min, max) {
 }
 
 // choose randomly the condition for the subject
-var condition = 1; //getRandomInt(1,2);
+var condition = 2; //getRandomInt(1,2);
 var imageSet = getRandomInt(1,2);
 
 
